@@ -4,7 +4,10 @@ import com.nico.manejodeerrores.exception.ResourceNotFoundException;
 import com.nico.manejodeerrores.model.User;
 import com.nico.manejodeerrores.repository.UserRepository;
 import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +29,13 @@ public class UserController {
         }else{
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+
+    @GetMapping("/")
+    public ResponseEntity<Iterable<User>> listarUsuarios(Pageable pageable){
+        Page<User> userPage = userRepository.findAll(pageable);
+            return new ResponseEntity<>(userPage, HttpStatus.OK);
+
     }
 
     @PostMapping("/")

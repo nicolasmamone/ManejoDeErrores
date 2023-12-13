@@ -3,12 +3,15 @@ package com.nico.manejodeerrores.exception;
 import com.nico.manejodeerrores.dto.ErrorDetail;
 import com.nico.manejodeerrores.dto.ValidationError;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -18,6 +21,10 @@ import java.util.List;
 
 @ControllerAdvice
 public class RestExceptionHandler {
+
+    @Autowired
+    private MessageSource messageSource;
+
 
     //Cuando se invoque a esta excepcion, este método lo va a manejar y hacer lo siguiente
     @ExceptionHandler(ResourceNotFoundException.class)
@@ -32,7 +39,7 @@ public class RestExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<?> handlerMethodArgumentNotValidException(MethodArgumentNotValidException exception, HttpServletRequest httpServletRequest){
+    public @ResponseBody ErrorDetail handlerMethodArgumentNotValidException(MethodArgumentNotValidException exception, HttpServletRequest httpServletRequest){
         ErrorDetail errorDetail = new ErrorDetail();
         errorDetail.setTimeStamp(new Date().getTime());
         errorDetail.setStatus(HttpStatus.BAD_REQUEST.value());
@@ -56,9 +63,9 @@ public class RestExceptionHandler {
 
             ValidationError validationError = new ValidationError();
             validationError.setCode(fieldError.getCode());
-            validationError.setMessage(fieldError.getDefaultMessage());
+            validationError.setMessage(messageSource.getMessage(fieldError,null));
             validationErrorList.add(validationError);
         }
-        return new ResponseEntity<>(errorDetail,null,HttpStatus.BAD_REQUEST);
+        return errorDetail;
     }
 }
